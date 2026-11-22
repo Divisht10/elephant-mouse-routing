@@ -3,4 +3,4 @@ numpy
 pandas
 matplotlib
 scipy
-pygambit
+pygambit==16.7.0
