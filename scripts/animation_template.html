@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elephant and mouse routing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&display=swap" rel="stylesheet">
+<style>
+/* VOICE work: a results exhibit for examiners, exact and calm
+   IDEA a naturalist's plate of a network: two species drawn on the links they use
+   PICTURE three links between source and sink, width = capacity, load meter inside, elephants and mice standing on their route
+   COLOUR white / night #0f1217, ink, prussian for elephants, carmine for mice, links in grey
+   TYPE Literata 600 display + Literata text
+   LAYOUT title and controls, network beside the species comparison, route timeline, learning chart. Phone: stack */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0f1217);--ink:light-dark(#10131a,#e9ecf2);--mute:light-dark(#596070,#9ba3b2);--rule:light-dark(#e3e6eb,#272c35);--pipe:light-dark(#e8eaee,#242a33);--panel:light-dark(#f6f7f9,#161b23);--el:light-dark(#0b4f8a,#64a6e8);--mo:light-dark(#c1121f,#f2646d)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 Literata,Georgia,serif;overflow-x:clip}
+.band{padding:clamp(24px,3.5vw,48px) max(4vw,16px);max-width:1280px;margin:0 auto}
+h1{font-weight:600;font-size:clamp(30px,4.2vw,44px);line-height:1.05;letter-spacing:-.02em;margin:0 0 8px;text-wrap:balance}
+h2{font-weight:600;font-size:22px;line-height:1.2;margin:0 0 6px}
+p{margin:0 0 8px;max-width:70ch}
+.sub,.note{color:var(--mute)}.note{font-size:14px}
+.ctrl{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-top:16px}
+.seg{display:inline-flex;border:1px solid var(--ink);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:none;color:var(--ink);font:15px Literata,serif;padding:0 14px;min-height:44px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--ink)}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.btn{border:1px solid var(--ink);background:var(--ink);color:var(--bg);font:600 15px Literata,serif;border-radius:8px;min-height:44px;padding:0 20px;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--el);outline-offset:2px}
+label{display:inline-flex;align-items:center;gap:8px;font-size:15px;cursor:pointer}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--ink)}
+.sl{display:grid;grid-template-columns:5.5em minmax(0,1fr) 4.5em;gap:12px;align-items:center;margin-top:4px}
+.sl span:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+input[type=range]{width:100%;height:36px;accent-color:var(--ink)}
+.top{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:32px;margin-top:18px}
+.fig{position:relative;min-height:380px}
+.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+svg text{font-family:Literata,Georgia,serif;paint-order:stroke;stroke:var(--bg);stroke-width:4px}
+.tok{transition:transform .5s cubic-bezier(.4,.1,.2,1)}
+.side{display:flex;flex-direction:column;gap:16px}
+.big{border-top:2px solid var(--ink);padding-top:10px}
+.big b{display:block;font-weight:600;font-size:clamp(44px,6vw,60px);line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;margin-top:8px;font-size:14px;font-weight:600;border:1px solid var(--ink);border-radius:999px;padding:1px 10px}
+.sp{border-top:1px solid var(--rule);padding-top:10px}
+.sp h3{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:600;margin:0 0 4px}
+.w{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--pipe);margin:6px 0 4px;max-width:260px}
+.w i{display:block;height:100%}
+table{border-collapse:collapse;width:100%;font-size:15px;margin-top:6px}
+th{text-align:left;font-weight:400;color:var(--mute);font-size:13px;padding:2px 6px 4px 0}
+td{padding:3px 6px 3px 0;border-top:1px solid var(--rule)}
+.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tl{display:grid;grid-template-columns:5.5em minmax(0,1fr);gap:3px 10px;align-items:center;margin-top:22px}
+.tl .lab{font-size:14px;color:var(--mute);white-space:nowrap}
+.row{display:grid;grid-template-columns:repeat(60,minmax(0,1fr));gap:1px;height:18px}
+.row i{display:block;cursor:pointer;border-radius:1px}
+.row i.cur{outline:2px solid var(--ink);position:relative;z-index:1}
+.ld i{background:var(--pipe)}.ld i.h{background:color-mix(in srgb,var(--ink) 30%,var(--bg))}
+.e0{background:var(--el)}.e1{background:color-mix(in srgb,var(--el) 45%,var(--bg))}.e2{background:color-mix(in srgb,var(--el) 15%,var(--bg))}
+.m0{background:var(--mo)}.m1{background:color-mix(in srgb,var(--mo) 45%,var(--bg))}.m2{background:color-mix(in srgb,var(--mo) 15%,var(--bg))}
+#chart{min-height:300px}
+.two{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:32px;align-items:start}
+@media(max-width:900px){.top,.two{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.seg button{padding:0 10px}.tl{grid-template-columns:3.2em minmax(0,1fr)}.fig{min-height:330px}table{font-size:13px}}
+@media(prefers-reduced-motion:reduce){.tok{transition:none}}
+</style>
+</head>
+<body>
+<section class="band">
+  <h1>Elephants and mice sharing three links</h1>
+  <p class="sub" id="intro">Two elephants want throughput, two mice want low delay, and all four choose a route every step. Below are their greedy Q-learning policies, frozen during training and replayed on the same 60 steps of background traffic.</p>
+
+  <div class="ctrl">
+    <div class="seg" id="modes" role="group" aria-label="Reward scheme">
+      <button data-m="selfish" aria-pressed="true">Selfish</button>
+      <button data-m="team" aria-pressed="false">Team</button>
+      <button data-m="tolled" aria-pressed="false">Tolled</button>
+    </div>
+    <div class="seg" id="anim" role="group" aria-label="What Play animates">
+      <button data-a="train" aria-pressed="true">Through training</button>
+      <button data-a="replay" aria-pressed="false">Through replay</button>
+    </div>
+    <button class="btn" id="play">Play</button>
+    <label for="ghost"><input type="checkbox" id="ghost"> Show social optimum</label>
+  </div>
+  <div class="sl"><span class="sub">Episode</span><input type="range" id="cp" min="0" max="30" value="30" aria-label="Training episode"><span id="eplab">3000</span></div>
+  <div class="sl"><span class="sub">Step</span><input type="range" id="st" min="0" max="59" value="0" aria-label="Replay step"><span id="stlab">1 / 60</span></div>
+
+  <div class="top">
+    <div class="fig" id="net"><svg id="netsvg" role="img" aria-label="Three routes between source and sink, with the agents on their chosen routes">
+      <defs>
+        <symbol id="el" viewBox="0 0 44 30"><path d="M4 13Q1 16 2 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><rect x="7" y="19" width="5.5" height="10" rx="1.6" fill="currentColor"/><rect x="21" y="19" width="5.5" height="10" rx="1.6" fill="currentColor"/><ellipse cx="18" cy="15" rx="14" ry="10" fill="currentColor"/><circle cx="33" cy="12" r="8" fill="currentColor"/><path d="M39 14Q44 20 40.5 27" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/><ellipse cx="29.5" cy="12" rx="4.8" ry="7" fill="#fff" opacity=".28"/><circle cx="36" cy="10" r="1.3" fill="#fff"/></symbol>
+        <symbol id="mo" viewBox="0 0 34 20"><path d="M6 14Q0 17 1.5 9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><ellipse cx="15" cy="12.5" rx="10" ry="6.5" fill="currentColor"/><ellipse cx="25" cy="11.5" rx="6.2" ry="4.8" fill="currentColor"/><circle cx="31.3" cy="12" r="1.4" fill="currentColor"/><circle cx="22" cy="6" r="3.8" fill="currentColor"/><circle cx="22" cy="6" r="2" fill="#fff" opacity=".3"/><circle cx="27" cy="10" r="1" fill="#fff"/></symbol>
+      </defs>
+      <g id="g"></g>
+    </svg></div>
+
+    <div class="side">
+      <div class="big"><b id="ratio">1.00×</b><span class="sub" id="ratiosub"></span><br><span class="tag" id="tag"></span></div>
+      <div class="sp" id="sp-el"></div>
+      <div class="sp" id="sp-mo"></div>
+      <p class="note" id="gap"></p>
+    </div>
+  </div>
+
+  <div class="tl" id="tl" aria-label="Route of each agent at every replay step"></div>
+  <p class="note">One cell per replay step, click to jump. Darkest cell = R1 (fast), mid = R2 (wide), lightest = R3 (backup). Shaded load cells have high background traffic.</p>
+</section>
+
+<section class="band">
+  <div class="two">
+    <div>
+      <h2 id="charth">Replay cost as training proceeds</h2>
+      <div class="fig" id="chart"><svg id="chartsvg" role="img" aria-label="Replay cost relative to the optimum across training, one line per reward scheme"></svg></div>
+    </div>
+    <div>
+      <p class="note" id="srcnote"></p>
+      <p class="note">Cost vs optimum is the mean, over the 60 replay steps, of social cost divided by the optimum at that step's background load. The equilibrium gap is the most any one agent could gain by switching to its best response against the other three policies (0 means an equilibrium).</p>
+      <p class="note">Every number here comes from the project's Python code: network.simulate_network for costs, game_theory.py for the optimum and Nash equilibria. Means over five seeds are in results/tables/main_comparison.csv.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+{
+const D = /*DATA*/null;
+const NAMES = ["Elephant 1", "Elephant 2", "Mouse 3", "Mouse 4"];
+const KIND = ["fast, narrow", "wide, slow", "thin backup"];
+const MODES = ["selfish", "team", "tolled"], LABEL = {selfish: "Selfish", team: "Team", tolled: "Tolled"};
+const SLOT = [.12, .37, .63, .88];
+const $ = id => document.getElementById(id);
+const sp = i => i < 2 ? "el" : "mo";
+
+const decode = c => { const b = c >= 81 ? 1 : 0, i = c % 81; return {b, i, a: [27, 9, 3, 1].map(k => Math.floor(i / k) % 3)}; };
+const row = (b, i) => { const r = D.table[b][i]; return {sc: r[0], cost: r.slice(1, 5), load: r.slice(5, 8), delay: r.slice(8, 11), thr: r.slice(11, 14)}; };
+const ratioOf = s => s.steps.reduce((t, c) => { const {b, i} = decode(c); return t + row(b, i).sc / D.opt[b]; }, 0) / s.steps.length;
+const fmtMs = d => d >= 100 ? "100 ms (cap)" : d.toFixed(1) + " ms";
+
+const st = {mode: "selfish", cp: 30, t: 0, anim: "train", timer: null};
+const snap = () => D.modes[st.mode][st.cp];
+const net = $("netsvg"), g = $("g"), chart = $("chartsvg");
+let geo = null;
+
+function drawNet() {
+  const W = net.clientWidth, H = net.clientHeight, narrow = W < 520;
+  const x0 = narrow ? 18 : 26, x1 = W - x0, my = H * .5;
+  const ys = [H * .21, H * .53, H * .85];
+  const bend = Math.min((x1 - x0) * .1, 60), xa = x0 + bend, xb = x1 - bend;
+  const wid = D.routes.map(r => Math.max(4, r.cap * .16));
+  const k = narrow ? .78 : 1, size = {el: [46 * k, 31 * k], mo: [30 * k, 18 * k]};
+  geo = {ys, xa, xb, wid, size};
+  const path = r => `M${x0},${my} L${xa},${ys[r]} L${xb},${ys[r]} L${x1},${my}`;
+  const icon = (i, cls) => { const [w, h] = size[sp(i)]; return `<use href="#${sp(i)}" x="${-w / 2}" y="${-h}" width="${w}" height="${h}" class="${cls}" style="color:var(--${sp(i)})"/>`; };
+  g.innerHTML =
+    D.routes.map((r, j) => `<path d="${path(j)}" fill="none" stroke="var(--pipe)" stroke-width="${wid[j]}" stroke-linejoin="round"/>
+      <line id="m${j}" x1="${xa}" x2="${xa}" y1="${ys[j]}" y2="${ys[j]}" stroke="var(--ink)" stroke-opacity=".7" stroke-width="${wid[j] * .45}"/>
+      <text x="${xa}" y="${ys[j] + wid[j] / 2 + 18}" font-size="14" fill="var(--ink)">R${j + 1}${narrow ? "" : " · " + KIND[j]} · ${r.cap} Mb/s · ${r.tau} ms</text>
+      <text id="u${j}" x="${xb}" y="${ys[j] + wid[j] / 2 + (narrow ? 35 : 18)}" font-size="14" text-anchor="end" fill="var(--mute)"></text>`).join("") +
+    [x0, x1].map((x, n) => `<circle cx="${x}" cy="${my}" r="13" fill="var(--bg)" stroke="var(--ink)" stroke-width="2"/><text x="${x}" y="${my + 5}" font-size="13" text-anchor="middle" fill="var(--ink)" style="stroke:none">${n ? "D" : "S"}</text>`).join("") +
+    NAMES.map((_, i) => `<g class="tok" id="h${i}" opacity=".2">${icon(i, "")}</g>`).join("") +
+    NAMES.map((_, i) => `<g class="tok" id="t${i}">${icon(i, "")}<text x="${size[sp(i)][0] / 2 + 1}" y="${-size[sp(i)][1] + 9}" font-size="12" font-weight="600" fill="var(--${sp(i)})">${i + 1}</text></g>`).join("");
+  render();
+}
+
+function place(el, i, r) {
+  el.style.transform = `translate(${geo.xa + (geo.xb - geo.xa) * SLOT[i]}px,${geo.ys[r] - geo.wid[r] / 2 - 1}px)`;
+}
+
+function speciesBlock(kind, res, a) {
+  const ids = kind === "el" ? [0, 1] : [2, 3], ag = D.agents[ids[0]];
+  const tw = Math.round(ag.alpha * 100);
+  return `<h3><svg width="${kind === "el" ? 30 : 24}" height="20" aria-hidden="true"><use href="#${kind}" width="100%" height="100%" style="color:var(--${kind})"/></svg>${kind === "el" ? "Elephants" : "Mice"} <span class="sub" style="font-weight:400;font-size:14px">${ag.demand} Mb/s each</span></h3>
+    <div class="w" aria-hidden="true"><i style="width:${tw}%;background:var(--${kind})"></i></div>
+    <span class="note">Cost weighs throughput ${tw}%, delay ${100 - tw}%</span>
+    <table><thead><tr><th></th><th>Route</th><th class="n">Delivered</th><th class="n">Delay</th><th class="n">Cost</th></tr></thead><tbody>${ids.map(i => {
+      const r = a[i];
+      return `<tr><td>${i + 1}</td><td>R${r + 1}</td><td class="n">${Math.round(res.thr[r] * 100)}%</td><td class="n">${fmtMs(res.delay[r])}</td><td class="n">${res.cost[i].toFixed(3)}</td></tr>`;
+    }).join("")}</tbody></table>`;
+}
+
+function render() {
+  const s = snap(), {b, i, a} = decode(s.steps[st.t]), res = row(b, i);
+  if (geo) {
+    a.forEach((r, n) => place($("t" + n), n, r));
+    const so = decode(D.so[b][0]).a, show = $("ghost").checked;
+    so.forEach((r, n) => { const h = $("h" + n); place(h, n, r); h.style.display = show ? "" : "none"; });
+    res.load.forEach((x, j) => {
+      const u = x / D.routes[j].cap;
+      $("m" + j).setAttribute("x2", geo.xa + (geo.xb - geo.xa) * Math.min(1, u));
+      $("u" + j).textContent = `${Math.round(x)} of ${D.routes[j].cap} Mb/s${u >= 1 ? ", over capacity" : ""} · ${fmtMs(res.delay[j])}`;
+    });
+  }
+  $("ratio").textContent = (res.sc / D.opt[b]).toFixed(2) + "×";
+  $("ratiosub").textContent = `social cost ${res.sc.toFixed(3)} vs optimum ${D.opt[b].toFixed(3)} at ${b ? "high" : "low"} background load (${Math.round(D.beta[b] * 100)}%)`;
+  $("tag").textContent = D.so[b].includes(i) ? "Social optimum" : D.ne[b].includes(i) ? "Nash equilibrium of the one-shot game" : "Not an equilibrium";
+  $("sp-el").innerHTML = speciesBlock("el", res, a);
+  $("sp-mo").innerHTML = speciesBlock("mo", res, a);
+  $("gap").textContent = `Equilibrium gap of these policies: ${s.gap.toFixed(3)}. One agent could still gain this much value by changing its own policy.`;
+  $("eplab").textContent = s.ep; $("cp").value = st.cp;
+  $("stlab").textContent = `${st.t + 1} / ${s.steps.length}`; $("st").value = st.t;
+  document.querySelectorAll(".row i").forEach(c => c.classList.toggle("cur", +c.dataset.t === st.t));
+  marker();
+}
+
+function buildTimeline() {
+  const steps = snap().steps.map(decode);
+  const cells = f => steps.map((p, t) => `<i data-t="${t}" class="${f(p)}" title="Step ${t + 1}"></i>`).join("");
+  $("tl").innerHTML = `<span class="lab">Load</span><div class="row ld">${cells(p => p.b ? "h" : "")}</div>` +
+    NAMES.map((n, i) => `<span class="lab">${n.replace("Elephant", "Eleph.")}</span><div class="row">${cells(p => (i < 2 ? "e" : "m") + p.a[i])}</div>`).join("");
+}
+
+let cg = null;
+function drawChart() {
+  const W = chart.clientWidth, H = chart.clientHeight, narrow = W < 520;
+  const m = {l: 44, r: narrow ? 14 : 64, t: 12, b: 32};
+  const series = Object.fromEntries(MODES.map(k => [k, D.modes[k].map(ratioOf)]));
+  const ymax = Math.max(...MODES.flatMap(k => series[k]));
+  const n = D.modes.selfish.length, eps = D.modes.selfish.map(s => s.ep);
+  const X = j => m.l + (W - m.l - m.r) * j / (n - 1);
+  const Y = v => H - m.b - (H - m.t - m.b) * Math.log(v) / Math.log(ymax * 1.05);
+  cg = {X, Y, m, H, series};
+  const yt = [1, 1.5, 2, 5, 10, 20, 50].filter(v => v <= ymax * 1.05);
+  const xt = eps.filter(e => e % (narrow ? 1500 : 500) === 0);
+  const line = k => series[k].map((v, j) => `${j ? "L" : "M"}${X(j).toFixed(1)},${Y(v).toFixed(1)}`).join("");
+  const ends = MODES.map(k => ({k, y: Y(series[k][n - 1]) + 4})).sort((p, q) => p.y - q.y);
+  ends.forEach((e, j) => { if (j) e.y = Math.max(e.y, ends[j - 1].y + 16); });
+  chart.innerHTML =
+    yt.map(v => `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--rule)"/><text x="${m.l - 8}" y="${Y(v) + 5}" font-size="13" text-anchor="end" fill="var(--mute)">${v}×</text>`).join("") +
+    xt.map(e => `<text x="${X(eps.indexOf(e))}" y="${H - 8}" font-size="13" text-anchor="middle" fill="var(--mute)">${e}</text>`).join("") +
+    `<text x="${m.l + 6}" y="${Y(1) - 6}" font-size="13" fill="var(--mute)">optimum</text>` +
+    MODES.filter(k => k !== st.mode).map(k => `<path d="${line(k)}" fill="none" stroke="var(--mute)" stroke-opacity=".5" stroke-width="1.5"/>`).join("") +
+    `<path d="${line(st.mode)}" fill="none" stroke="var(--ink)" stroke-width="2.5"/>` +
+    (narrow ? "" : ends.map(({k, y}) => `<text x="${W - m.r + 6}" y="${y}" font-size="13" font-weight="${k === st.mode ? 600 : 400}" fill="${k === st.mode ? "var(--ink)" : "var(--mute)"}">${LABEL[k]}</text>`).join("")) +
+    `<line id="cm" y1="${m.t}" y2="${H - m.b}" stroke="var(--ink)" stroke-dasharray="3 3"/><circle id="cd" r="5" fill="var(--ink)"/>`;
+  marker();
+}
+
+function marker() {
+  if (!cg || !$("cm")) return;
+  const x = cg.X(st.cp), y = cg.Y(cg.series[st.mode][st.cp]);
+  $("cm").setAttribute("x1", x); $("cm").setAttribute("x2", x);
+  $("cd").setAttribute("cx", x); $("cd").setAttribute("cy", y);
+}
+
+function notes() {
+  const f = D.modes[st.mode], r0 = ratioOf(f[0]), r1 = ratioOf(f[f.length - 1]);
+  $("charth").textContent = `${LABEL[st.mode]}: replay cost falls from ${r0.toFixed(1)}× to ${r1.toFixed(2)}× the optimum`;
+  const all = f[0].steps.every(c => decode(c).a.every(r => r === 0));
+  $("srcnote").textContent = `One training run per scheme (Q-learning, seed ${D.seed}); replay seed ${D.replaySeed}.` +
+    (all ? " At episode 0 the policies are untrained and every agent takes R1, the shortest path." : "");
+}
+
+const update = () => { buildTimeline(); render(); };
+function setMode(m) {
+  st.mode = m;
+  document.querySelectorAll("#modes button").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === m));
+  drawChart(); notes(); update();
+}
+
+function stop() { clearInterval(st.timer); st.timer = null; $("play").textContent = "Play"; }
+function tick() {
+  if (st.anim === "train") { if (st.cp < 30) { st.cp++; update(); } else stop(); }
+  else { if (st.t < 59) { st.t++; render(); } else stop(); }
+}
+function play() {
+  if (st.timer) return stop();
+  if (st.anim === "train" && st.cp === 30) { st.cp = 0; update(); }
+  if (st.anim === "replay" && st.t === 59) { st.t = 0; render(); }
+  $("play").textContent = "Pause";
+  st.timer = setInterval(tick, st.anim === "train" ? 650 : 450);
+}
+
+$("modes").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setMode(b.dataset.m); });
+$("anim").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; stop(); st.anim = b.dataset.a;
+  document.querySelectorAll("#anim button").forEach(x => x.setAttribute("aria-pressed", x === b)); });
+$("play").addEventListener("click", play);
+$("cp").addEventListener("input", e => { st.cp = +e.target.value; update(); });
+$("st").addEventListener("input", e => { st.t = +e.target.value; render(); });
+$("ghost").addEventListener("change", render);
+$("tl").addEventListener("click", e => { const c = e.target.closest("i[data-t]"); if (c) { st.t = +c.dataset.t; render(); } });
+
+const netObs = new ResizeObserver(drawNet); netObs.observe(net);
+const chartObs = new ResizeObserver(drawChart); chartObs.observe(chart);
+notes(); buildTimeline(); drawNet(); drawChart();
+}
+</script>
+</body>
+</html>
