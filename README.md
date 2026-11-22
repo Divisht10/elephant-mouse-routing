@@ -186,7 +186,7 @@ results/
 Python 3.10 or newer. Linux or macOS:
 
 ```bash
-git clone https://github.com/USERNAME/elephant-mouse-routing.git
+git clone https://github.com/divisht10/elephant-mouse-routing.git
 cd elephant-mouse-routing
 python3 -m venv .venv
 source .venv/bin/activate
