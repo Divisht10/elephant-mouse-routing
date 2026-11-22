@@ -546,15 +546,11 @@ the Monte Carlo cut-off fix, and the UI snapshot hook.
 
 ## Report
 
-The final report is `report/main.tex` (PRIME AI / arXiv
+The final report is `report/FAI_Final_report_group20` (PRIME AI / arXiv
 template, `arxiv.sty`). It reads its figures from
 `results/figures/`, and every table in it is taken from
 `results/tables/` and `results/data/`. To build it:
 
-```bash
-cd report
-pdflatex main.tex && pdflatex main.tex
-```
 
 | Report item | Source file |
 |---|---|
