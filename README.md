@@ -575,5 +575,4 @@ pdflatex main.tex && pdflatex main.tex
 | Helly Bera | Game-theoretic analysis: pure and mixed equilibria, PoA/PoS, sequential SPNE, repeated-game thresholds, potential-game property of the toll (`game_theory.py`, `mixed_equilibrium.py`, `sequential_game.py`, `repeated_game.py`, `minmax_punishment.py`, `markov_trigger.py`) |
 | Anshul Khamele | MDP reduction and policy-iteration benchmark, equilibrium gap, evaluation pipeline, baselines and sweeps (`policy_iteration.py`, `equilibrium_gap.py`, `baselines.py`, `scripts/`) |
 
-All three contributed to the experiments, report and
-presentation.
+All three contributed to the experiments and report.
