@@ -309,6 +309,12 @@ snapshots does not change training (checked in
 equilibrium gaps match the seed-42 rows of
 `results/data/cooperation_evaluation.csv`.
 
+**Run using** :
+
+```bash
+ xdg-open results/routing_animation.html 
+```
+
 **Rebuild** after any change to the code:
 
 ```bash
