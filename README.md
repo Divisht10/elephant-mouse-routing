@@ -58,6 +58,7 @@ them directly:
 - [Figures](#figures)
 - [Tests](#tests)
 - [Limitations](#limitations)
+- [Report](#report)
 - [Contributors](#contributors)
 
 ---
@@ -337,6 +338,8 @@ python scripts/build_animation.py
 | 10% | 0.1081 | 6 | 35 (6 + 29) | 1.654 / 3.461 | 1.355 / 1.086 |
 | 25% | 0.1470 | 8 | 18 (8 + 10) | 1.811 / 2.167 | 1.409 / 1.409 |
 
+![Stage-game social cost: optimum vs best and worst pure NE](results/figures/fig1_stage_game.png)
+
 The social optimum is (R2, R3, R1, R1): the elephants
 split the wide and backup routes, and both mice take the
 fast route. It is not an equilibrium at either load. At
@@ -364,8 +367,14 @@ value, averaged over states; 5 seeds.
 
 Both learners come within about 0.03–0.06 of the optimal
 value, while matching the optimal action in only 40–67%
-of states: many different policies come close to the
-optimal value.
+of states. Against fixed opponents only 6 of the 162
+states recur after the first step (the others' previous
+routes are always the fixed profile); the remaining
+states are seen only as initial states, so their actions
+barely affect the value. Value gap is the more
+informative measure.
+
+![Value gap to the policy-iteration optimum](results/figures/fig7_rl_value_gap.png)
 
 ### RQ3: Four agents learning together
 
@@ -387,6 +396,14 @@ units, γ = 0.9; 0 means an equilibrium).
 | Monte Carlo, team | 0.226 | 1.83 ± 0.32 | 0.595 ± 0.107 | 0.326 |
 | Monte Carlo, tolled | 0.155 | 1.27 ± 0.02 | 0.296 ± 0.024 | 0.006 |
 
+![Efficiency ratio by reward scheme and algorithm](results/figures/fig4_efficiency.png)
+
+![Social cost during training, Q-learning](results/figures/fig2_learning_curves.png)
+
+![Equilibrium gap of the learned joint policies](results/figures/fig9_equilibrium_gap.png)
+
+![Greedy actions changed per 100 episodes](results/figures/fig10_policy_changes.png)
+
 - Every learner beats both baselines by a wide margin.
 - No learned joint policy is an equilibrium (all gaps are
   above zero).
@@ -394,9 +411,14 @@ units, γ = 0.9; 0 means an equilibrium).
   whose team learners switch routes often and settle
   poorly.
 - Tolled learners are very consistent across seeds
-  (efficiency std 0.001) and all settle at about 1.25 ×:
-  the toll makes the optimum an equilibrium, but not the
-  only one, and the learners settle short of it.
+  (efficiency std 0.001) and all settle at about 1.25 ×.
+  They end on (R2, R2, R1, R1): the mice keep the fast
+  route but both elephants stay on R2. The toll makes the
+  optimum an equilibrium of the tolled stage game, but
+  this profile is not one (mean tolled stage regret 0.031):
+  either elephant would gain by moving to R3. If both
+  moved, R3 would saturate, so the likely cause is a
+  coordination failure between two identical learners.
 - Q-learning greedy policies are still changing slightly
   at the end of training; Monte Carlo policies stop
   changing early (fig 10).
@@ -426,6 +448,8 @@ With the model's switching cost, deviating from the
 optimum never pays: a one-step deviation gains at most
 0.0132 < κ, and a lasting one is punished.
 
+![Deviation gain vs discount factor in the Markov game](results/figures/fig13_markov_trigger.png)
+
 **Discount-factor sweep** (`results/tables/sweep_summary.csv`,
 Q-learning, efficiency ratio):
 
@@ -437,6 +461,8 @@ Q-learning, efficiency ratio):
 | 0.90 | 1.46 | 1.14 | 1.25 |
 | 0.95 | 1.47 | 1.21 | 1.22 |
 | 0.99 | 1.53 | 1.16 | 1.11 |
+
+![Q-learning across discount factors](results/figures/fig11_gamma_sweep.png)
 
 **Hyperparameters** (one setting changed at a time from
 the defaults; efficiency ratio):
@@ -518,10 +544,36 @@ the Monte Carlo cut-off fix, and the UI snapshot hook.
 
 ---
 
+## Report
+
+The final report is `report/main.tex` (PRIME AI / arXiv
+template, `arxiv.sty`). It reads its figures from
+`results/figures/`, and every table in it is taken from
+`results/tables/` and `results/data/`. To build it:
+
+```bash
+cd report
+pdflatex main.tex && pdflatex main.tex
+```
+
+| Report item | Source file |
+|---|---|
+| Table 2 (stage game) | `tables/stage_game_summary.csv`, `tables/mixed_equilibrium_summary.csv` |
+| Sequential play (Section 5.1) | `tables/sequential_summary.csv` |
+| Table 3, Figure 2 (RQ2) | `tables/rl_comparison_summary.csv`, figs 7–8 |
+| Table 4, Figures 3–5 (RQ3) | `tables/main_comparison.csv`, figs 2, 4, 9, 10 |
+| Table 5, Figure 6 (trigger strategies) | `tables/markov_trigger_summary.csv`, fig 13 |
+| Table 6, Figure 7 (sweeps) | `tables/sweep_summary.csv`, fig 11 |
+
+---
+
 ## Contributors
 
-- Helly Bera
-- Divisht
-- Anshul
+| Member | Work |
+|---|---|
+| Divisht | Network model and Markov-game simulator (`network.py`, `environment.py`, `rewards.py`); Monte Carlo and Q-learning agents under selfish, team and tolled rewards (`monte_carlo.py`, `q_learning.py`, `multi_agent.py`, `cooperation.py`) |
+| Helly Bera | Game-theoretic analysis: pure and mixed equilibria, PoA/PoS, sequential SPNE, repeated-game thresholds, potential-game property of the toll (`game_theory.py`, `mixed_equilibrium.py`, `sequential_game.py`, `repeated_game.py`, `minmax_punishment.py`, `markov_trigger.py`) |
+| Anshul Khamele | MDP reduction and policy-iteration benchmark, equilibrium gap, evaluation pipeline, baselines and sweeps (`policy_iteration.py`, `equilibrium_gap.py`, `baselines.py`, `scripts/`) |
 
-See the final report for individual contributions.
+All three contributed to the experiments, report and
+presentation.
