@@ -85,21 +85,22 @@ With background level $\beta$, the load on route $r$ is
 the background share of its capacity plus the demand of
 every agent on it:
 
-$$x_r = \beta C_r + \sum_{i:\,a_i = r} d_i$$
+$$x_r = \beta C_r + \sum_{i: a_i = r} d_i$$
 
 Delay grows with utilisation and is capped at
-$D_{\max} = 100$ ms (the cap also applies once a route is
+$D_{max} = 100$ ms (the cap also applies once a route is
 at or over capacity):
 
-$$D_r = \min\!\left(D_{\max},\ \frac{\tau_r}{1 - x_r/C_r}\right)$$
+$$D_r = \min(D_{max}, \frac{\tau_r}{1 - x_r/C_r})$$
 
-Normalised throughput and latency:
+Normalised throughput and latency, with
+$L_{max} = 100$ ms:
 
-$$T_r = \min\!\left(1,\ \frac{C_r}{x_r}\right), \qquad L_r = \min\!\left(1,\ \frac{D_r}{L_{\max}}\right),\ L_{\max} = 100 \text{ ms}$$
+$$T_r = \min(1, \frac{C_r}{x_r}), \qquad L_r = \min(1, \frac{D_r}{L_{max}})$$
 
 Agent $i$ on route $r$ pays
 
-$$c_i = \alpha_i\,(1 - T_r) + (1 - \alpha_i)\,L_r$$
+$$c_i = \alpha_i (1 - T_r) + (1 - \alpha_i) L_r$$
 
 and the social cost is $\sum_i c_i$.
 
@@ -117,12 +118,13 @@ and the social cost is $\sum_i c_i$.
 
 | Scheme | Reward of agent $i$ |
 |---|---|
-| Selfish | $r_i = -c_i - \kappa\,\mathbb{1}[a_i \ne a_i^{\text{prev}}]$ |
-| Team | every agent receives $\sum_j r_j^{\text{selfish}}$ |
-| Tolled | $r_i^{\text{selfish}} - \phi_i$, with externality toll $\phi_i = \sum_{j \ne i} \left[c_j(a) - c_j(a \text{ without } i)\right]$ |
+| Selfish | $r_i = -c_i - \kappa$ if agent $i$ switched route, else $r_i = -c_i$ |
+| Team | every agent receives the sum of all four selfish rewards |
+| Tolled | selfish reward minus the externality toll $\phi_i = \sum_{j \ne i} (c_j - c_j^{-i})$ |
 
-The toll charges each agent the extra cost it imposes on
-the others. With it, each agent's tolled cost differs
+Here $c_j^{-i}$ is agent $j$'s cost if agent $i$'s
+traffic were removed from the network, so the toll charges
+each agent the extra cost it imposes on the others. With it, each agent's tolled cost differs
 from the social cost only by a term it cannot influence,
 so the stage game is an exact potential game whose
 potential is the social cost (checked in
@@ -308,12 +310,6 @@ snapshots does not change training (checked in
 `tests/test_new_experiments.py`), and the final
 equilibrium gaps match the seed-42 rows of
 `results/data/cooperation_evaluation.csv`.
-
-**Run using** :
-
-```bash
- xdg-open results/routing_animation.html 
-```
 
 **Rebuild** after any change to the code:
 
